@@ -251,15 +251,15 @@ int main()
 
    try {
       std::istringstream sIncompleteDocument("[ true, ");
-      std::cout << "Reading incomplete document; expecting Parse exception" << std::endl;
+      std::cout << "Reading incomplete document; expecting Scan exception" << std::endl;
 
       json::Array arrayDocument;
       json::Reader::Read(arrayDocument, sIncompleteDocument);
    }
-   catch (Reader::ParseException& e)
+   catch (Reader::ScanException& e)
    {
-      std::cout << "Caught json::ParseException: " << e.what() << ", Line/offset: " << e.m_locTokenBegin.m_nLine + 1
-                << '/' << e.m_locTokenBegin.m_nLineOffset + 1 << std::endl << std::endl;
+      std::cout << "Caught json::ScanException: " << e.what() << ", Line/offset: " << e.m_locError.m_nLine + 1
+                << '/' << e.m_locError.m_nLineOffset + 1 << std::endl << std::endl;
    }
 
 

@@ -102,7 +102,8 @@ private:
          TOKEN_MEMBER_ASSIGN, //    :
          TOKEN_STRING,        //    "xxx"
          TOKEN_NUMBER,        //    [+/-]000.000[e[+/-]000]
-         TOKEN_BOOLEAN,       //    true -or- false
+         TOKEN_BOOLEAN_TRUE,  //    true
+         TOKEN_BOOLEAN_FALSE, //    false
          TOKEN_NULL,          //    null
       };
 
@@ -122,7 +123,8 @@ private:
    static void Read_i(ElementTypeT& element, std::istream& istr);
 
    // scanning istream into token sequence
-   void Scan(Tokens& tokens, InputStream& inputStream);
+   Token::Type Peek(InputStream& inputStream);
+   Token GetNextToken(InputStream& inputStream);
 
    void EatWhiteSpace(InputStream& inputStream);
    std::string MatchString(InputStream& inputStream);
@@ -130,15 +132,15 @@ private:
    std::string MatchExpectedString(InputStream& inputStream, const std::string& sExpected);
 
    // parsing token sequence into element structure
-   void Parse(UnknownElement& element, TokenStream& tokenStream);
-   void Parse(Object& object, TokenStream& tokenStream);
-   void Parse(Array& array, TokenStream& tokenStream);
-   void Parse(String& string, TokenStream& tokenStream);
-   void Parse(Number& number, TokenStream& tokenStream);
-   void Parse(Boolean& boolean, TokenStream& tokenStream);
-   void Parse(Null& null, TokenStream& tokenStream);
+   void Parse(UnknownElement& element, InputStream& inputStream);
+   void Parse(Object& object, InputStream& inputStream);
+   void Parse(Array& array, InputStream& inputStream);
+   void Parse(String& string, InputStream& inputStream);
+   void Parse(Number& number, InputStream& inputStream);
+   void Parse(Boolean& boolean, InputStream& inputStream);
+   void Parse(Null& null, InputStream& inputStream);
 
-   const std::string& MatchExpectedToken(Token::Type nExpected, TokenStream& tokenStream);
+   Token MatchExpectedToken(Token::Type nExpected, InputStream& inputStream);
 };
 
 
