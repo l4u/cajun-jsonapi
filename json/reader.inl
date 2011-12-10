@@ -163,7 +163,7 @@ public:
    Token Get();
 
 private:
-   std::string MatchString();
+   std::string MatchQuotedString();
    std::string MatchNumber();
    std::string MatchExpectedString(const std::string& sExpected);
 
@@ -220,9 +220,9 @@ inline Reader::Token::Type Reader::Scanner::Peek()
 inline Reader::Token Reader::Scanner::Get()
 {
    Token token;
-   token.nType = Peek();
    token.locBegin = m_InputStream.GetLocation();
 
+   token.nType = Peek();
    switch (token.nType)
    {
       case Token::TOKEN_OBJECT_BEGIN:    token.sValue = MatchExpectedString("{");       break;
@@ -231,7 +231,7 @@ inline Reader::Token Reader::Scanner::Get()
       case Token::TOKEN_ARRAY_END:       token.sValue = MatchExpectedString("]");       break;
       case Token::TOKEN_NEXT_ELEMENT:    token.sValue = MatchExpectedString(",");       break;
       case Token::TOKEN_MEMBER_ASSIGN:   token.sValue = MatchExpectedString(":");       break;
-      case Token::TOKEN_STRING:          token.sValue = MatchString();                    break;
+      case Token::TOKEN_STRING:          token.sValue = MatchQuotedString();                    break;
       case Token::TOKEN_NUMBER:          token.sValue = MatchNumber();                    break;
       case Token::TOKEN_BOOLEAN_TRUE:    token.sValue = MatchExpectedString("true");    break;
       case Token::TOKEN_BOOLEAN_FALSE:   token.sValue = MatchExpectedString("false");   break;
@@ -262,7 +262,7 @@ inline std::string Reader::Scanner::MatchExpectedString(const std::string& sExpe
 }
 
 
-inline std::string Reader::Scanner::MatchString()
+inline std::string Reader::Scanner::MatchQuotedString()
 {
    MatchExpectedString("\"");
 
