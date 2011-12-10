@@ -204,15 +204,36 @@ int main()
 
 
    ////////////////////////////////////////////////////////////////////
+   // smarter streaming
+
+   // library no longer throws an error if stream contents remain after parsing a document. that's up
+   //  to the application, since it might not be an error. this allows reading "inlined" data, rather
+   //  than reading document data to a separate string and streaming that. 
+
+   std::stringstream ss;
+   UnknownElement objStreamed1, objStreamed2;
+   
+   ss << objRoot << objRoot;
+   ss >> objStreamed1 >> objStreamed2;
+
+   bEquals = (objStreamed1 == objStreamed2);
+   std::cout << "Two documents stream in with no errors, and should be equivalent. operator == returned: "
+      << (bEquals ? "true" : "false") << std::endl << std::endl;   
+
+   // note that you must be careful with streaming data between documents. c++ i/o streaming is asymmetric: 
+   // ostream<< will write up to a null terminator, while istream>> will read until the first whitespace. 
+   // best to use getline with your own delimiter if your little princess data stream demands this treatment. 
+
+   ////////////////////////////////////////////////////////////////////
    // document read error handling
 
    // mis-predicting type type will fail with a parse error. we'll try reading an array into an object
    try
    {
-      std::istringstream sBadDocument("[1, 2]"); // missing comma!
+      std::istringstream sArrayDocument("[1, 2]");
       std::cout << "Reading Object-based document into an Array; expecting Parse exception" << std::endl;
       Object objDocument;
-      Reader::Read(objDocument, sBadDocument);
+      Reader::Read(objDocument, sArrayDocument);
    }
    catch (Reader::ParseException& e)
    {

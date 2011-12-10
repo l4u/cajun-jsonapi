@@ -27,8 +27,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************/
 
-
-
 #pragma once
 
 #include "elements.h"
@@ -90,57 +88,14 @@ public:
    static void Read(UnknownElement& elementRoot, std::istream& istr);
 
 private:
-   struct Token
-   {
-      enum Type
-      {
-         TOKEN_OBJECT_BEGIN,  //    {
-         TOKEN_OBJECT_END,    //    }
-         TOKEN_ARRAY_BEGIN,   //    [
-         TOKEN_ARRAY_END,     //    ]
-         TOKEN_NEXT_ELEMENT,  //    ,
-         TOKEN_MEMBER_ASSIGN, //    :
-         TOKEN_STRING,        //    "xxx"
-         TOKEN_NUMBER,        //    [+/-]000.000[e[+/-]000]
-         TOKEN_BOOLEAN_TRUE,  //    true
-         TOKEN_BOOLEAN_FALSE, //    false
-         TOKEN_NULL,          //    null
-      };
+   struct Token;
 
-      Type nType;
-      std::string sValue;
-
-      // for malformed file debugging
-      Reader::Location locBegin;
-      Reader::Location locEnd;
-   };
-
-   class InputStream;
-   class TokenStream;
-   typedef std::vector<Token> Tokens;
+   class InputStream; // friendly istream adapter, keeps track of line & column offsets
+   class Scanner; // translates raw istream input into tokens
+   class Parser; // translates tokens into JSON elements
 
    template <typename ElementTypeT>   
    static void Read_i(ElementTypeT& element, std::istream& istr);
-
-   // scanning istream into token sequence
-   Token::Type Peek(InputStream& inputStream);
-   Token GetNextToken(InputStream& inputStream);
-
-   void EatWhiteSpace(InputStream& inputStream);
-   std::string MatchString(InputStream& inputStream);
-   std::string MatchNumber(InputStream& inputStream);
-   std::string MatchExpectedString(InputStream& inputStream, const std::string& sExpected);
-
-   // parsing token sequence into element structure
-   void Parse(UnknownElement& element, InputStream& inputStream);
-   void Parse(Object& object, InputStream& inputStream);
-   void Parse(Array& array, InputStream& inputStream);
-   void Parse(String& string, InputStream& inputStream);
-   void Parse(Number& number, InputStream& inputStream);
-   void Parse(Boolean& boolean, InputStream& inputStream);
-   void Parse(Null& null, InputStream& inputStream);
-
-   Token MatchExpectedToken(Token::Type nExpected, InputStream& inputStream);
 };
 
 

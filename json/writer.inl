@@ -42,14 +42,21 @@ TODO:
 namespace json
 {
 
+inline std::ostream& operator << (std::ostream& ostr, const UnknownElement& elementRoot)
+{
+   Writer::Write(elementRoot, ostr);
+   return ostr;
+}
 
-inline void Writer::Write(const UnknownElement& elementRoot, std::ostream& ostr) { Write_i(elementRoot, ostr); }
-inline void Writer::Write(const Object& object, std::ostream& ostr)              { Write_i(object, ostr); }
-inline void Writer::Write(const Array& array, std::ostream& ostr)                { Write_i(array, ostr); }
-inline void Writer::Write(const Number& number, std::ostream& ostr)              { Write_i(number, ostr); }
-inline void Writer::Write(const String& string, std::ostream& ostr)              { Write_i(string, ostr); }
-inline void Writer::Write(const Boolean& boolean, std::ostream& ostr)            { Write_i(boolean, ostr); }
-inline void Writer::Write(const Null& null, std::ostream& ostr)                  { Write_i(null, ostr); }
+
+
+inline void Writer::Write(const UnknownElement& elementRoot, std::ostream& ostr) { Write_i(elementRoot, ostr); ostr << std::endl; }
+inline void Writer::Write(const Object& object, std::ostream& ostr)              { Write_i(object, ostr); ostr << std::endl; }
+inline void Writer::Write(const Array& array, std::ostream& ostr)                { Write_i(array, ostr); ostr << std::endl; }
+inline void Writer::Write(const Number& number, std::ostream& ostr)              { Write_i(number, ostr); ostr << std::endl; }
+inline void Writer::Write(const String& string, std::ostream& ostr)              { Write_i(string, ostr); ostr << std::endl; }
+inline void Writer::Write(const Boolean& boolean, std::ostream& ostr)            { Write_i(boolean, ostr); ostr << std::endl; }
+inline void Writer::Write(const Null& null, std::ostream& ostr)                  { Write_i(null, ostr); ostr << std::endl; }
 
 
 inline Writer::Writer(std::ostream& ostr) :
