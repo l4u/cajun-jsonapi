@@ -217,7 +217,7 @@ int main()
    ss >> objStreamed1 >> objStreamed2;
 
    bEquals = (objStreamed1 == objStreamed2);
-   std::cout << "Two documents stream in with no errors, and should be equivalent. operator == returned: "
+   std::cout << "Streaming in two documents with no errors, and should be equivalent. operator == returned: "
       << (bEquals ? "true" : "false") << std::endl << std::endl;   
 
    // note that you must be careful with streaming data between documents. c++ i/o streaming is asymmetric: 
