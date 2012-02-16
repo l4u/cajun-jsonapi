@@ -100,6 +100,8 @@ public:
    const Location& GetLocation() const { return m_Location; }
 
 private:
+   void ThrowIfEOS();
+
    std::istream& m_iStr;
    Location m_Location;
 };
@@ -107,7 +109,7 @@ private:
 
 inline char Reader::InputStream::Get()
 {
-   assert(m_iStr.eof() == false); // enforce reading of only valid stream data 
+   ThrowIfEOS();
    char c = m_iStr.get();
    
    ++m_Location.m_nDocOffset;
@@ -125,11 +127,7 @@ inline char Reader::InputStream::Get()
 
 inline char Reader::InputStream::Peek()
 {
-   if (m_iStr.eof()) // enforce reading of only valid stream data 
-   {
-      std::string sMessage = "Unexpected end of input stream";
-      throw ScanException(sMessage, GetLocation()); // nowhere to point to
-   }
+   ThrowIfEOS();
    return m_iStr.peek();
 }
 
@@ -137,8 +135,18 @@ inline char Reader::InputStream::Peek()
 inline bool Reader::InputStream::EOS()
 {
    // apparently eof flag isn't set until a character read is attempted. whatever.
-   Peek();    
+   m_iStr.peek();    
    return m_iStr.eof();
+}
+
+inline void Reader::InputStream::ThrowIfEOS()
+{
+   // apparently eof flag isn't set until a character read is attempted. whatever.
+   if (EOS()) // enforce reading of only valid stream data 
+   {
+      std::string sMessage = "Unexpected end of input stream";
+      throw ScanException(sMessage, GetLocation()); // nowhere to point to
+   }
 }
 
 inline void Reader::InputStream::EatWhiteSpace()
@@ -166,6 +174,7 @@ private:
    std::string MatchQuotedString();
    std::string MatchNumber();
    std::string MatchExpectedString(const std::string& sExpected);
+   std::string MatchComment();
 
    InputStream& m_InputStream;
 };
@@ -178,10 +187,17 @@ inline Reader::Scanner::Scanner(Reader::InputStream& inputStream) :
 
 inline Reader::Token::Type Reader::Scanner::Peek()
 {
+	// eat comments (if any)...
    m_InputStream.EatWhiteSpace();
+   while (m_InputStream.Peek() == '/')
+   {
+	   MatchComment();
+	   m_InputStream.EatWhiteSpace();
+   }
 
-   // gives us null-terminated string
+   // ...then down to bidniz
    char sChar = m_InputStream.Peek();
+
    Token::Type nType;
    switch (sChar)
    {
@@ -231,8 +247,8 @@ inline Reader::Token Reader::Scanner::Get()
       case Token::TOKEN_ARRAY_END:       token.sValue = MatchExpectedString("]");       break;
       case Token::TOKEN_NEXT_ELEMENT:    token.sValue = MatchExpectedString(",");       break;
       case Token::TOKEN_MEMBER_ASSIGN:   token.sValue = MatchExpectedString(":");       break;
-      case Token::TOKEN_STRING:          token.sValue = MatchQuotedString();                    break;
-      case Token::TOKEN_NUMBER:          token.sValue = MatchNumber();                    break;
+      case Token::TOKEN_STRING:          token.sValue = MatchQuotedString();            break;
+      case Token::TOKEN_NUMBER:          token.sValue = MatchNumber();                  break;
       case Token::TOKEN_BOOLEAN_TRUE:    token.sValue = MatchExpectedString("true");    break;
       case Token::TOKEN_BOOLEAN_FALSE:   token.sValue = MatchExpectedString("false");   break;
       case Token::TOKEN_NULL:            token.sValue = MatchExpectedString("null");    break;
@@ -322,6 +338,45 @@ inline std::string Reader::Scanner::MatchNumber()
    return sNumber;
 }
 
+
+inline std::string Reader::Scanner::MatchComment()
+{
+   std::string sCommentText;
+
+   MatchExpectedString("/");
+
+   if (m_InputStream.Peek() == '/') // c++ style comment
+   {
+      MatchExpectedString("/");
+
+     // read until the end of the line
+      while (m_InputStream.EOS() == false &&
+             m_InputStream.Peek() != '\n')
+     {
+         sCommentText.push_back(m_InputStream.Get());
+     }
+   }
+   else // must be a c style comment
+   {
+      MatchExpectedString("*");
+      while (1)
+      {
+       // read up to (but not including) "*/"
+         char nCurrentChar = m_InputStream.Get(),
+              nNextChar = m_InputStream.Peek();
+         if (nCurrentChar == '*' && 
+            nNextChar == '/')
+         {
+            MatchExpectedString("/");
+            break;
+         }
+
+         sCommentText.push_back(nCurrentChar);   
+      }
+   }
+
+   return sCommentText;
+}
 
 ///////////////////
 // Reader::Parser

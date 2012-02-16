@@ -283,6 +283,21 @@ int main()
                 << '/' << e.m_locError.m_nLineOffset + 1 << std::endl << std::endl;
    }
 
+   const char* sCommentedDocument =
+	"["
+		"// comment\n"
+		"false, // another comment\n"
+		"/*yet another comment*/\n"
+		"1.0\n"
+	"]";
+
+   std::istringstream isCommentedDocument(sCommentedDocument);
+   std::cout << "Reading document with comments..." << std::endl;
+   
+   json::Array commentedDocument;
+   json::Reader::Read(commentedDocument, isCommentedDocument);
+
+   std::cout << "Success" << std::endl << std::endl;
 
    return 0;
 }
